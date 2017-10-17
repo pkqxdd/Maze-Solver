@@ -1,0 +1,15 @@
+===========
+The Journal
+===========
+
+
+.. toctree::
+    :maxdepth: 1
+
+    Oct13.rst
+    Oct14.rst
+
+
+
+
+.. I hope that by the time I finish this project, I say:"The best part is, I journaled everything"

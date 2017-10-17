@@ -1,0 +1,13 @@
+============
+The Tutorial
+============
+
+I decide to keep both a journal and a tutorial so that when, in the future, people ask me what I did in the fall term of 2017, I have something to show them. I'm aiming to make this a replicable project. For reasonings of my decisions, please refer to the journal part.
+
+.. toctree::
+    :maxdepth: 1
+
+    Project Proposal <Plan.rst>
+    A* Search Algorithm <Ast.rst>
+    Abstract Base Classes <AbstractBaseClasses.rst>
+    Data Structure <Data_Structure.rst>

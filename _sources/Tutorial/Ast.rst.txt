@@ -1,0 +1,17 @@
+===================
+A* Search Algorithm
+===================
+
+A* (A-star) search algorithm is a well-known graph search algorithm. It is the perfect algorithm for this project.
+
+.. image:: ../_static/Ast0.jpg
+
+.. image:: ../_static/Ast1.jpg
+
+.. image:: ../_static/Ast2.jpg
+
+.. image:: ../_static/Ast3.jpg
+
+.. image:: ../_static/Ast4.jpg
+
+Material From: `edX open course ColumbiaX: CSMM. 101x Artifitial Intelengence <https://courses.edx.org/courses/course-v1:ColumbiaX+CSMM.101x+2T2017/course/>`_
