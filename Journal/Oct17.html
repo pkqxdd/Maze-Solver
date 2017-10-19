@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tuesday, October 17 &#8212; The Maze Solver</title>
+    <link rel="stylesheet" href="../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Saturnday, October 14" href="Oct14.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../index.html">The Maze Solver</a> &#187;</li>
+          <li><a href="index.html" accesskey="U">The Journal</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tuesday-october-17">
+<h1>Tuesday, October 17<a class="headerlink" href="#tuesday-october-17" title="Permalink to this headline">¶</a></h1>
+<p>I calculated the torque needed for each motor.</p>
+<p>Mass of the robot: less than 100 grams, say 200 for safety measures.
+Powered by 2 motors.
+The wheels have radius of 3 cm (that’s just an arbitrary number)
+The friction coeffient of rubber on wood is 0.95
+<a class="reference external" href="http://www2.mae.ufl.edu/designlab/Class%20Projects/Background%20Information/Friction%20coefficients.htm">http://www2.mae.ufl.edu/designlab/Class%20Projects/Background%20Information/Friction%20coefficients.htm</a></p>
+<p>Minimum torque needed:</p>
+<div class="math">
+\[\tau = F\cdot r = f \cdot r = c \cdot G \cdot r = cmgr\]</div>
+<p>Where</p>
+<ul class="simple">
+<li><span class="math">\(F\)</span> is the friction of the wheels</li>
+<li><span class="math">\(c\)</span> is the friction coeffient, 0.95</li>
+<li><span class="math">\(G\)</span> is the gravitational force on the robot</li>
+<li><span class="math">\(m\)</span> is the mass of robot</li>
+<li><span class="math">\(g\)</span> is the gravity constant</li>
+<li><span class="math">\(r\)</span> is the radius of the wheel, 3</li>
+</ul>
+<p>Therefore,</p>
+<div class="math">
+\[\begin{split}\tau &amp;= 0.95  \cdot 0.2kg \cdot 9.8 N/kg \cdot 0.03 m\\
+&amp;=0.05586 N\cdot m = 7.9104425370524325 oz\cdot in\end{split}\]</div>
+<p>Each motor should have a minium torque of 4 oz-in.</p>
+<p><a class="reference external" href="https://www.pololu.com/category/60/micro-metal-gearmotors">https://www.pololu.com/category/60/micro-metal-gearmotors</a></p>
+<p><a class="reference external" href="https://www.pololu.com/docs/0J19/3">https://www.pololu.com/docs/0J19/3</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+    <a id="sidebar-anchor"></a>
+    
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Tutorial/index.html">The Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">The Journal</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Plan.html">Project Proposal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct13.html">Friday, October 13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct14.html">Saturnday, October 14</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tuesday, October 17</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Oct14.html"
+                        title="previous chapter">Saturnday, October 14</a></p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Oct14.html" title="Saturnday, October 14"
+             accesskey="P">previous</a> |</li>
+      </ul>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Ruocheng Wang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

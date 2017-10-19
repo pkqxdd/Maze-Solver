@@ -1,0 +1,11 @@
+===========
+Maze Solver
+===========
+
+Final Robotics Project for CS450HO. Last update on |today|
+
+.. toctree::
+    :maxdepth: 2
+
+    The Tutorial <Tutorial/index.rst>
+    The Journal <Journal/index.rst>
