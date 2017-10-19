@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>A* Search Algorithm &#8212; The Maze Solver</title>
+    <title>Tuesday, October 17 &#8212; The Maze Solver</title>
     <link rel="stylesheet" href="../_static/pydoctheme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Abstract Base Classes" href="AbstractBaseClasses.html" />
-    <link rel="prev" title="The Tutorial" href="index.html" />
+    <link rel="prev" title="Saturnday, October 14" href="Oct14.html" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <link rel="shortcut icon" type="image/png" href="../_static/favicon.png" />
     <meta name="viewport" content="width=device-width,initial-scale=0.8">
@@ -39,7 +38,7 @@
       <ul>
         <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
         <li><a href="../index.html">The Maze Solver</a> &#187;</li>
-          <li><a href="index.html" accesskey="U">The Tutorial</a> &#187;</li> 
+          <li><a href="index.html" accesskey="U">The Journal</a> &#187;</li> 
       </ul>
     </div>
     
@@ -50,15 +49,33 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="a-search-algorithm">
-<h1>A* Search Algorithm<a class="headerlink" href="#a-search-algorithm" title="Permalink to this headline">¶</a></h1>
-<p>A* (A-star) search algorithm is a well-known graph search algorithm. It is the perfect algorithm for this project.</p>
-<img alt="../_images/Ast0.jpg" src="../_images/Ast0.jpg" />
-<img alt="../_images/Ast1.jpg" src="../_images/Ast1.jpg" />
-<img alt="../_images/Ast2.jpg" src="../_images/Ast2.jpg" />
-<img alt="../_images/Ast3.jpg" src="../_images/Ast3.jpg" />
-<img alt="../_images/Ast4.jpg" src="../_images/Ast4.jpg" />
-<p>Material From: <a class="reference external" href="https://courses.edx.org/courses/course-v1:ColumbiaX+CSMM.101x+2T2017/course/">edX open course ColumbiaX: CSMM. 101x Artifitial Intelengence</a></p>
+  <div class="section" id="tuesday-october-17">
+<h1>Tuesday, October 17<a class="headerlink" href="#tuesday-october-17" title="Permalink to this headline">¶</a></h1>
+<p>I calculated the torque needed for each motor.</p>
+<p>Mass of the robot: less than 100 grams, say 200 for safety measures.
+Powered by 2 motors.
+The wheels have radius of 3 cm (that’s just an arbitrary number)
+The friction coeffient of rubber on wood is 0.95
+<a class="reference external" href="http://www2.mae.ufl.edu/designlab/Class%20Projects/Background%20Information/Friction%20coefficients.htm">http://www2.mae.ufl.edu/designlab/Class%20Projects/Background%20Information/Friction%20coefficients.htm</a></p>
+<p>Minimum torque needed:</p>
+<div class="math">
+\[\tau = F\cdot r = f \cdot r = c \cdot G \cdot r = cmgr\]</div>
+<p>Where</p>
+<ul class="simple">
+<li><span class="math">\(F\)</span> is the friction of the wheels</li>
+<li><span class="math">\(c\)</span> is the friction coeffient, 0.95</li>
+<li><span class="math">\(G\)</span> is the gravitational force on the robot</li>
+<li><span class="math">\(m\)</span> is the mass of robot</li>
+<li><span class="math">\(g\)</span> is the gravity constant</li>
+<li><span class="math">\(r\)</span> is the radius of the wheel, 3</li>
+</ul>
+<p>Therefore,</p>
+<div class="math">
+\[\begin{split}\tau &amp;= 0.95  \cdot 0.2kg \cdot 9.8 N/kg \cdot 0.03 m\\
+&amp;=0.05586 N\cdot m = 7.9104425370524325 oz\cdot in\end{split}\]</div>
+<p>Each motor should have a minium torque of 4 oz-in.</p>
+<p><a class="reference external" href="https://www.pololu.com/category/60/micro-metal-gearmotors">https://www.pololu.com/category/60/micro-metal-gearmotors</a></p>
+<p><a class="reference external" href="https://www.pololu.com/docs/0J19/3">https://www.pololu.com/docs/0J19/3</a></p>
 </div>
 
 
@@ -81,21 +98,19 @@
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">The Tutorial</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">A* Search Algorithm</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AbstractBaseClasses.html">Abstract Base Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Data_Structure.html">Data Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorial/index.html">The Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">The Journal</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Plan.html">Project Proposal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct13.html">Friday, October 13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct14.html">Saturnday, October 14</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tuesday, October 17</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../Journal/index.html">The Journal</a></li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">The Tutorial</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="AbstractBaseClasses.html"
-                        title="next chapter">Abstract Base Classes</a></p>
+  <p class="topless"><a href="Oct14.html"
+                        title="previous chapter">Saturnday, October 14</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -107,10 +122,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="AbstractBaseClasses.html" title="Abstract Base Classes"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="The Tutorial"
+          <a href="Oct14.html" title="Saturnday, October 14"
              accesskey="P">previous</a> |</li>
       </ul>
     </div>

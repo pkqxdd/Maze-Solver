@@ -6,8 +6,10 @@ The Journal
 .. toctree::
     :maxdepth: 1
 
+    Plan.rst
     Oct13.rst
     Oct14.rst
+    Oct17.rst
 
 
 

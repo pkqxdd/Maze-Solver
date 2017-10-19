@@ -7,7 +7,6 @@ I decide to keep both a journal and a tutorial so that when, in the future, peop
 .. toctree::
     :maxdepth: 1
 
-    Project Proposal <Plan.rst>
     A* Search Algorithm <Ast.rst>
     Abstract Base Classes <AbstractBaseClasses.rst>
     Data Structure <Data_Structure.rst>
