@@ -1,3 +1,244 @@
 ===================
 Tuesday, October 24
 ===================
+
+I restructured my codes today. I also deleted the class :class:`Direction` completely, for I realized I don't need to care about the direction. All I need is the angle between two nodes and the length of the edges. Everything else can be easily calculated with trigonometry. This also increases the precision of the coordinate system
+
+I also wrote the abstract base class for a robot
+
+AbstractBaseClasses.py
+======================
+
+.. code-block:: python
+
+    #!/usr/local/bin/python3.6
+    # -*- coding:utf-8 -*-
+
+    import warnings
+
+    class BaseNode:
+        """A node is the intersection of two lines, or a dead end"""
+        registry = set()
+        next_index = 0
+        radius = 5  # The radius of a node is actually the tolerance of error in a node's coordinate. The shape of a node is actually a square, not a circle
+
+        def __new__(cls, *args, **kwargs):
+            """Assign each class instance a unique id number"""
+            instance = super().__new__(cls)
+            instance.__index = BaseNode.next_index
+            BaseNode.next_index += 1
+            BaseNode.registry.add(instance)
+            cls.registry.add(instance)
+            return instance
+
+        def __init__(self, *coordinate: (int, int), N=None, S=None, E=None, W=None):
+            """
+            :param coordinate: a 2-tuple (x,y)
+            :param N: An instance of BaseEdge, default to None
+            :param S: An instance of BaseEdge, default to None
+            :param E: An instance of BaseEdge, default to None
+            :param W: An instance of BaseEdge, default to None
+            """
+            try:
+                assert isinstance(coordinate, (tuple, list))
+                assert len(coordinate) == 2
+                assert isinstance(coordinate[0], int)
+                assert isinstance(coordinate[1], int)
+            except AssertionError:
+                err = TypeError("Coordinate must be a tuple (x,y), where x and y are int")
+                err.__suppress_context__ = True
+                raise err
+
+
+
+            self.coordinate = coordinate
+
+            self.north_edge = N
+            self.south_edge = S
+            self.east_edge = E
+            self.west_edge = W
+
+        @property
+        def index(self):
+            return self.__index
+
+        def __hash__(self):
+            """Make nodes hashable so that they can be stored in a hashtable"""
+            return self.index
+
+        def __repr__(self):
+            return "<BaseNode {i} at {coordinate}>".format(i=self.index, coordinate=self.coordinate)
+
+        def __eq__(self, other):
+            if isinstance(other, int):
+                return self.index == other
+            elif isinstance(other, BaseNode):
+                return self.index == other.index
+            else:
+                raise TypeError("%s cannot be compared with instance of %s" % (other.__class__, self.__class__))
+
+
+    class BaseEdge:
+        """An edge is the part that connecting two nodes"""
+
+        def __init__(self, length: int):
+            self.length = length
+            self.nodes = []
+
+        def add_node(self, node: BaseNode):
+            if len(self.nodes) > 1:
+                raise OverflowError("An edge can only connect nodes. Current parents are %s and %s" % self.nodes)
+            elif node in self.nodes:
+                raise ValueError("%s is already a node of this edge" % node)
+            else:
+                self.nodes.append(node)
+
+        def __len__(self):return self.length
+
+        def __repr__(self):
+            return "<BaseEdge with length of "+str(self.length)+">"
+
+
+    class BaseRobot:
+        def __init__(self):
+            self.location = (0, 0)  # A robot always starts at the origin
+            self._orientation = 0  # For the orientation property
+
+        def move(self, x, y):
+            """
+            :param int x: number of unit the robot should move in the coordinate plane on x-axis
+            :param int y: number of unit the robot should move in the coordinate plane on y-axis
+            :return: coordinate after moving
+            """
+
+            raise NotImplemented
+
+        @property
+        def orientation(self):
+            "The orientation of the robot is calculated in degrees, from -179 to 180, relative to the x-axis of the coordinate plane, as in a unit circle"
+
+            return self._orientation
+
+        @orientation.setter
+        def orientation(self, value):
+            try:
+                assert (value <= 360), "Orientation should be smaller than 360 degree"
+                assert (value >= - 180), "Orientation should be greater than -180 degree"
+            except AssertionError as err:
+                err = ValueError(err)
+                err.__suppress_context__ = True
+                raise err
+            if - 6.29 < value < 6.29:
+                warnings.warn("Orientation angle %f is too small. Check if it is converted to degrees." % value)
+
+            if value > 180: value = -value % 180
+
+            self._orientation = int(value)
+
+        def turn(self, degree):
+            """
+            :param int degree: degree the robot should turn
+            :return: coordinate after turning
+            """
+            raise NotImplemented
+
+        def is_moving(self):
+            """
+            :return: boolean, whether the robot is moving or not
+            """
+
+            raise NotImplemented
+
+DataStructures.py
+=================
+
+.. code-block::
+
+    # -*- coding:utf8 -*-
+
+    from AbstractBaseClasses import BaseNode, BaseEdge
+    import sys
+
+
+    class Node(BaseNode):
+        map={} # A dict that stores coverage area of a node. This is used for fast overlap testing
+
+        def __init__(self,*coordinate):
+            super().__init__(*coordinate)
+            self.x=coordinate[0]
+            self.y=coordinate[1]
+
+            # Add this node to map
+            for i in range(self.radius):
+                for j in range(self.radius):
+                    self.__class__.map[(self.x+i,self.y+j)]=self.index
+                    self.__class__.map[(self.x - i, self.y + j)] = self.index
+                    self.__class__.map[(self.x + i, self.y - j)] = self.index
+                    self.__class__.map[(self.x - i, self.y - j)] = self.index
+
+        @classmethod
+        def find_node(cls,*coordinate) -> int:
+            """returns the index number of the node at coordinate, -1 if no such node is found"""
+            try:
+                assert isinstance(coordinate, (tuple, list))
+                assert len(coordinate) == 2
+                assert isinstance(coordinate[0], int)
+                assert isinstance(coordinate[1], int)
+            except AssertionError:
+                err = TypeError("Coordinate must be a tuple (x,y), where x and y are int")
+                err.__suppress_context__ = True
+                raise err
+
+            try:
+                return cls.map[coordinate]
+            except KeyError:
+                return -1
+
+        def __repr__(self):
+            return "<Node {i} at {coordinate}>".format(i=self.index, coordinate=self.coordinate)
+
+
+        def connect_to(self,node):
+            if not isinstance(node,BaseNode):
+                raise TypeError("Node must be an instance of BaseNode")
+
+            dy=abs(node.y-self.y)
+            dx=abs(node.x-self.x)
+            if dy>self.radius and dx>self.radius: raise ValueError("{node0} and {node1} are not in a straight line".format(node1=node,node0=self))
+            raise NotImplemented
+
+
+    class DeadEnd(BaseNode):
+        def __init__(self): # A DeadEnd has only one branch
+            raise NotImplemented
+
+
+    class Edge(BaseEdge):
+
+        def __init__(self,length,node0,node1):
+            super().__init__(length)
+            self.nodes.append(node0)
+            self.nodes.append(node1)
+
+        def is_connecting_to(self, origin_index) -> Node:
+            """Return the node to which the origin node is connecting"""
+
+            if origin_index in self.nodes:
+                return self.nodes[1] if origin_index == self.nodes[0] else self.nodes[1]
+            else:
+                raise ValueError("Node %d is not connected with this edge" % origin_index)
+
+        def __repr__(self):
+            return "<Edge of length {length} connecting {node0} to {node1}>".format(length=self.length, node0=repr(self.nodes[0]), node1=(self.nodes[1]))
+
+    class EdgeNotDiscovered(Exception): pass
+
+
+    class UndiscoveredEdge(BaseEdge):
+        def __init__(self,node):
+            super().__init__(length=sys.maxsize)  # This edge is undiscovered so its length is set to infinity
+            self.nodes.append(node)
+
+        def is_connecting_to(self, origin_index) -> Node:
+            """Return the node to which the origin node is connecting"""
+            raise EdgeNotDiscovered("This edge is not discovered yet. We don't know where it is connecting to")

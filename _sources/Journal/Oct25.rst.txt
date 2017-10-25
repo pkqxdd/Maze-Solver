@@ -29,7 +29,7 @@ Minimum battery capacity required for the motors:
 
 .. math::
 
-    3.2A \times 80\% \times 10min = 2.56A \times \frac{1}{6}h = 0.427Ah=427mAh
+    3.2A \times 10min = 3.2A \times \frac{1}{6}h = 0.533Ah=533mAh
 
 As for the power banks, any random less than 10 dollars power bank can do the job.
 
