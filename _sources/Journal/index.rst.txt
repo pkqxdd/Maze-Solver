@@ -10,6 +10,8 @@ The Journal
     Oct13.rst
     Oct14.rst
     Oct17.rst
+    Oct24.rst
+    Oct25.rst
 
 
 

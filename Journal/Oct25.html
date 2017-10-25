@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Wednesday, October 25 &#8212; The Maze Solver</title>
+    <link rel="stylesheet" href="../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Tuesday, October 24" href="Oct24.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../index.html">The Maze Solver</a> &#187;</li>
+          <li><a href="index.html" accesskey="U">The Journal</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="wednesday-october-25">
+<h1>Wednesday, October 25<a class="headerlink" href="#wednesday-october-25" title="Permalink to this headline">¶</a></h1>
+<p>Today I researched a lot about what power source I Need. Here is a list of major devices that is using power</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Device</th>
+<th class="head">Input Voltage</th>
+<th class="head">Input Current</th>
+<th class="head">Input USB</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Raspberry Pi</td>
+<td>5-5.5v</td>
+<td>2A</td>
+<td>MicroUSB or jumpers</td>
+</tr>
+<tr class="row-odd"><td>Arduino Uno</td>
+<td>6-20v</td>
+<td>1A max</td>
+<td>USB-B or 2.1mm center positive plug</td>
+</tr>
+<tr class="row-even"><td>2 DC Motors</td>
+<td>6v</td>
+<td>120mA free-run, 1.6A stall each</td>
+<td>from motor shield</td>
+</tr>
+<tr class="row-odd"><td>Motor Shield</td>
+<td>6-18v</td>
+<td>–</td>
+<td>2.1mm center-positive plug or jumpers</td>
+</tr>
+</tbody>
+</table>
+<p>The DC motors will probably not operate at stall current. I assume it will draw about 80% of the stall curent (this is only a random guess.) I also want the robot to operate for at least 10 minutes before I have to recharge the battery.</p>
+<p>It is really hard to find a single power source to power the entire system. Voltage higher than 5.5v will damage the RPi, but the motors require 6v power. Besides, the system requires 5A of current to function safely.</p>
+<div class="section" id="solution-1">
+<h2>Solution 1<a class="headerlink" href="#solution-1" title="Permalink to this headline">¶</a></h2>
+<p>The best way I can think of is to use one power bank and one rechargable battery. The power bank can connect to the raspberry pi and the battery connect to the motor shield. The power for arduino will come from the Raspberry Pi via USB cable.</p>
+<img alt="../_images/power.png" src="../_images/power.png" />
+<p>Minimum battery capacity required for the motors:</p>
+<div class="math">
+\[3.2A \times 80\% \times 10min = 2.56A \times \frac{1}{6}h = 0.427Ah=427mAh\]</div>
+<p>As for the power banks, any random less than 10 dollars power bank can do the job.</p>
+</div>
+<div class="section" id="solution-2">
+<h2>Solution 2<a class="headerlink" href="#solution-2" title="Permalink to this headline">¶</a></h2>
+<p>Another solution is to use one giant 7.2v LiPo battery to power the entire system, like the <a class="reference external" href="http://www.robotmarketplace.com/products/0-276-1491.html">battery for VEX Robotics</a> .</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">It is possible to reverse power the Raspberry Pi via its GPIO pin. But the voltage must be exactly 5v, or the pin will be damaged.</p>
+</div>
+<p>References:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="https://store.arduino.cc/usa/arduino-motor-shield-rev3">ARDUINO MOTOR SHIELD REV3 Documentation</a></li>
+<li><a class="reference external" href="https://www.lifewire.com/ways-to-power-your-raspberry-pi-4092246">10 Ways to Power your Raspberry Pi</a></li>
+<li><a class="reference external" href="https://www.modmypi.com/blog/how-do-i-power-my-raspberry-pi">How do I power my Raspberry Pi?</a></li>
+<li><a class="reference external" href="https://www.rugged-circuits.com/10-ways-to-destroy-an-arduino/">10 Ways to Destroy An Arduino</a></li>
+<li><a class="reference external" href="https://electronics.stackexchange.com/a/37066/166448">USB cable as +5v vcc source</a></li>
+<li><a class="reference external" href="https://rogershobbycenter.com/lipoguide/">A Guide to Understanding LiPo Batteries</a></li>
+<li><a class="reference external" href="http://www.me.umn.edu/courses/me2011/arduino/technotes/dcmotors/motor-tutorial/">Understanding DC Motors</a></li>
+<li><a class="reference external" href="https://www.pololu.com/product/2213/specs">50:1 Micro Metal Gearmotor HP 6V with Extended Motor Shaft Specs</a></li>
+<li><a class="reference external" href="https://robotics.stackexchange.com/a/615">What is stall current and free current of motors?</a></li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+    <a id="sidebar-anchor"></a>
+    
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorial/index.html">The Tutorial</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">The Journal</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Plan.html">Project Proposal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct13.html">Friday, October 13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct14.html">Saturnday, October 14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct17.html">Tuesday, October 17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Oct24.html">Tuesday, October 24</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Wednesday, October 25</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#solution-1">Solution 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solution-2">Solution 2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Oct24.html"

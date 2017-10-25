@@ -6,6 +6,11 @@ Final Robotics Project for CS450HO. Last update on |today|
 
 .. toctree::
     :maxdepth: 2
+    :hidden:
 
     The Tutorial <Tutorial/index.rst>
+
+.. toctree::
+    :maxdepth: 2
+
     The Journal <Journal/index.rst>

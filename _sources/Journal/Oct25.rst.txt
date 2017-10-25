@@ -1,0 +1,55 @@
+=====================
+Wednesday, October 25
+=====================
+
+Today I researched a lot about what power source I Need. Here is a list of major devices that is using power
+
+
+.. csv-table::
+    :header: Device, Input Voltage, Input Current, Input USB
+
+    Raspberry Pi, 5-5.5v, 2A, MicroUSB or jumpers
+    Arduino Uno, 6-20v, 1A max, USB-B or 2.1mm center positive plug
+    2 DC Motors, 6v, "120mA free-run, 1.6A stall each", from motor shield
+    Motor Shield, 6-18v, -- , 2.1mm center-positive plug or jumpers
+
+The DC motors will probably not operate at stall current. I assume it will draw about 80% of the stall curent (this is only a random guess.) I also want the robot to operate for at least 10 minutes before I have to recharge the battery.
+
+It is really hard to find a single power source to power the entire system. Voltage higher than 5.5v will damage the RPi, but the motors require 6v power. Besides, the system requires 5A of current to function safely.
+
+Solution 1
+----------
+
+The best way I can think of is to use one power bank and one rechargable battery. The power bank can connect to the raspberry pi and the battery connect to the motor shield. The power for arduino will come from the Raspberry Pi via USB cable.
+
+.. image:: power.png
+
+
+Minimum battery capacity required for the motors:
+
+.. math::
+
+    3.2A \times 80\% \times 10min = 2.56A \times \frac{1}{6}h = 0.427Ah=427mAh
+
+As for the power banks, any random less than 10 dollars power bank can do the job.
+
+Solution 2
+----------
+
+Another solution is to use one giant 7.2v LiPo battery to power the entire system, like the `battery for VEX Robotics <http://www.robotmarketplace.com/products/0-276-1491.html>`_ .
+
+.. warning::
+    It is possible to reverse power the Raspberry Pi via its GPIO pin. But the voltage must be exactly 5v, or the pin will be damaged.
+
+
+References:
+
+#. `ARDUINO MOTOR SHIELD REV3 Documentation <https://store.arduino.cc/usa/arduino-motor-shield-rev3>`_
+#. `10 Ways to Power your Raspberry Pi <https://www.lifewire.com/ways-to-power-your-raspberry-pi-4092246>`_
+#. `How do I power my Raspberry Pi? <https://www.modmypi.com/blog/how-do-i-power-my-raspberry-pi>`_
+#. `10 Ways to Destroy An Arduino <https://www.rugged-circuits.com/10-ways-to-destroy-an-arduino/>`_
+#. `USB cable as +5v vcc source <https://electronics.stackexchange.com/a/37066/166448>`_
+#. `A Guide to Understanding LiPo Batteries <https://rogershobbycenter.com/lipoguide/>`_
+#. `Understanding DC Motors <http://www.me.umn.edu/courses/me2011/arduino/technotes/dcmotors/motor-tutorial/>`_
+#. `50:1 Micro Metal Gearmotor HP 6V with Extended Motor Shaft Specs <https://www.pololu.com/product/2213/specs>`_
+#. `What is stall current and free current of motors? <https://robotics.stackexchange.com/a/615>`_
