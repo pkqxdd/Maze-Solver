@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Thursday, October 26 &#8212; The Maze Solver</title>
+    <link rel="stylesheet" href="../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../index.html">The Maze Solver</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="thursday-october-26">
+<h1>Thursday, October 26<a class="headerlink" href="#thursday-october-26" title="Permalink to this headline">¶</a></h1>
+<p>I implemented the A* graph search today. It can solve a basic maze within 0.1 second on my computer, although it is not tested thoroughly yet. I’m also working on implementing the visual interface. I know it is the stretch goal for this project; but first, I have nothing better to do (actually, I have a lot of better things to do like play a video game, but whatever); second, the visual interface is very important to debugging.</p>
+<p>I also fixed some minor bugs in my code for <code class="xref py py-class docutils literal"><span class="pre">AbstractBaseClasses</span></code> and <code class="xref py py-class docutils literal"><span class="pre">DataStructures</span></code> , but I’m not posting them here.</p>
+<div class="section" id="maze-py">
+<h2>Maze.py<a class="headerlink" href="#maze-py" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># -*- coding:utf8 -*-</span>
+<span class="kn">import</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">heapq</span>
+
+<span class="kn">from</span> <span class="nn">AbstractBaseClasses</span> <span class="kn">import</span> <span class="n">BaseNode</span>
+<span class="kn">from</span> <span class="nn">DataStructures</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span><span class="n">DeadEnd</span>
+
+
+<span class="k">class</span> <span class="nc">NoSolution</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">Maze</span><span class="p">:</span>
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># the starting node is always the origin</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exit</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">search_route</span><span class="p">(</span><span class="n">node0</span><span class="p">:</span> <span class="n">BaseNode</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param node0: A BaseNode</span>
+<span class="sd">    :param node1: A Node, because there is no point to travel to a DeadEnd</span>
+<span class="sd">    :return: A list of nodes of the optimal path from start to end. Including node0 and node1</span>
+<span class="sd">    This function uses A* search algorithm to find the optimal path between two nodes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">frontier</span> <span class="o">=</span> <span class="n">Frontier</span><span class="p">()</span>
+    <span class="n">frontier</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">SearchNode</span><span class="p">(</span><span class="n">node0</span><span class="p">,</span> <span class="n">node1</span><span class="p">))</span>
+    <span class="n">explored</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">frontier</span><span class="p">):</span>  <span class="c1"># while not empty</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">frontier</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># node is always an instance of SearchNode</span>
+        <span class="n">explored</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="n">node1</span><span class="p">:</span>  <span class="c1"># goal reached</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">node</span><span class="p">]</span>  <span class="c1"># the node here is a SearchNode object and node.node is the actual Node object</span>
+            <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">node</span><span class="p">)</span>  <span class="c1"># trace back to origin</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">node</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">goal</span><span class="o">=</span><span class="n">node1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frontier</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">explored</span><span class="p">):</span>
+                <span class="n">frontier</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">frontier</span><span class="p">:</span>
+                <span class="n">frontier</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">frontier</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># I know this looks confusing</span>
+
+                <span class="c1"># the underlying data structure for the frontier is a set, which only compares the hash and equality of two objects</span>
+                <span class="c1"># two SearchNodes are compared to be equal if they have the same index, which came from the original Node</span>
+                <span class="c1"># the hash value of a SearchNode is also its index. So even if two SearchNodes have completely differently parent and cost,</span>
+                <span class="c1"># they are treated to be the same object by the frontier if they have the same index number</span>
+                <span class="c1"># So this two lines actually switched the node to a completely different one</span>
+
+    <span class="k">raise</span> <span class="n">NoSolution</span><span class="p">(</span><span class="s2">&quot;No possible route found between </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node0</span><span class="p">,</span> <span class="n">node1</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">mark_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exit</span> <span class="o">=</span> <span class="n">e</span>
+
+<span class="k">def</span> <span class="nf">find_way_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_route</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n0</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">n1</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param n0: index of 0th Node</span>
+<span class="sd">    :param n1: index of first BaseNode</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    This function is similar to Node.connect_to, but does not require a node instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Node</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">n0</span><span class="p">]</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">BaseNode</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">isDeadEnd</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseNode</span><span class="p">:</span>
+    <span class="s2">&quot;Proxy to create a new node&quot;</span>
+    <span class="k">if</span> <span class="n">isDeadEnd</span><span class="p">:</span> <span class="k">return</span> <span class="n">DeadEnd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">calculate_distance</span><span class="p">(</span><span class="n">node0</span><span class="p">:</span><span class="n">BaseNode</span><span class="p">,</span><span class="n">node1</span><span class="p">:</span><span class="n">BaseNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">node0</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">node1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">node0</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">node1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">SearchNode</span><span class="p">:</span>
+<span class="s2">&quot;This is for A* search only because a normal node does not store cost or its parent&quot;</span>
+
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">BaseNode</span><span class="p">,</span> <span class="n">goal</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">x</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">y</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>  <span class="c1"># this may be switched to a weakref for better performance</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">cost</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">index</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heuristic</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">heuristic</span><span class="p">(</span><span class="n">node0</span><span class="p">:</span> <span class="n">BaseNode</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="n">BaseNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This heuristic function is the Euclidean distance between two nodes&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">node0</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">node1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">node0</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">node1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">_edges</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">SearchNode</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get_other</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">goal</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span>
+
+<span class="k">def</span> <span class="fm">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span>
+
+<span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+
+<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;&lt;SearchNode </span><span class="si">%d</span><span class="s2"> at (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Frontier</span><span class="p">:</span>
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">members</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Average time for membership test for a set is O(1) but O(n) for a list, which is the whole point of having this class</span>
+
+<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">item</span>
+
+<span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">members</span>
+
+<span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">testRandomMaze</span><span class="p">():</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">maze</span> <span class="o">=</span> <span class="n">Maze</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Node</span><span class="o">.</span><span class="n">find_node</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">y</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">y</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Node </span><span class="si">%s</span><span class="s2"> already exist at (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">Node</span><span class="o">.</span><span class="n">find_node</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+<span class="n">e</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">registry</span><span class="p">)</span>
+<span class="n">maze</span><span class="o">.</span><span class="n">mark_exit</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;rd&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">maze</span><span class="o">.</span><span class="n">find_way_out</span><span class="p">())</span>
+<span class="k">except</span> <span class="n">NoSolution</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;No solution&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Time spent: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">testMaze</span><span class="p">():</span>
+<span class="n">maze</span> <span class="o">=</span> <span class="n">Maze</span><span class="p">()</span>
+<span class="n">n0</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">n1</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">n3</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">n4</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+<span class="n">n5</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">maze</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n0</span><span class="p">)</span>
+<span class="n">n0</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+<span class="n">n0</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n3</span><span class="p">)</span>
+<span class="n">n3</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n4</span><span class="p">)</span>
+<span class="n">n4</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+<span class="n">n1</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">connect_to</span><span class="p">(</span><span class="n">n5</span><span class="p">)</span>
+<span class="n">maze</span><span class="o">.</span><span class="n">mark_exit</span><span class="p">(</span><span class="n">n5</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">maze</span><span class="o">.</span><span class="n">find_way_out</span><span class="p">())</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="n">testRandomMaze</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+    <a id="sidebar-anchor"></a>
+    
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorial/index.html">The Tutorial</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">The Journal</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+      </ul>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Ruocheng Wang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
