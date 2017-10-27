@@ -2,227 +2,296 @@
 Thursday, October 26
 =====================
 
-I implemented the A* graph search today. It can solve a basic maze within 0.1 second on my computer, although it is not tested thoroughly yet. I'm also working on implementing the visual interface. I know it is the stretch goal for this project; but first, I have nothing better to do (actually, I have a lot of better things to do like play a video game, but whatever); second, the visual interface is very important to debugging.
+I implemented :class:`VisualizedMaze` today. I spent the entire afternoon plus study hours doing this. Programming is just so addictive to me, even more addictive than video games. Now I finally have a GUI debugger for the maze. I also fixed some minor bugs.
 
-I also fixed some minor bugs in my code for :class:`AbstractBaseClasses` and :class:`DataStructures` , but I'm not posting them here.
+.. raw:: html
 
+    <video width="681" height="373" controls>
+    <source src="../_static/Oct26.mp4" type="video/mp4">
+    </video>
 
-Maze.py
-=======
+I'm so glad I learned :class:`tkinter` when I was bored back in April
+
+VisualizedMaze.py
+=================
 
 .. code-block:: python
 
-    # -*- coding:utf8 -*-
-    import warnings, math, heapq
+    #!/usr/local/bin/python3.6
+    # coding=utf-8
 
+    from Maze import Maze, NoSolution
+    from DataStructures import Node, Edge
     from AbstractBaseClasses import BaseNode
-    from DataStructures import Node,DeadEnd
+    import tkinter as tk
+    import tkinter.ttk
+    import math, random, warnings
 
 
-    class NoSolution(Exception): pass
+    class VisualizedMaze(tk.Tk, Maze):
+        # TODO: add a function to scale the coordinate plane
 
-    class Maze:
-    def __init__(self):
-        self.origin = Node(0, 0)  # the starting node is always the origin
-        self.exit = None
+        def __init__(self, control=True):
+            super().__init__()
 
-    @staticmethod
-    def search_route(node0: BaseNode, node1: Node) -> list:
-        """
-        :param node0: A BaseNode
-        :param node1: A Node, because there is no point to travel to a DeadEnd
-        :return: A list of nodes of the optimal path from start to end. Including node0 and node1
-        This function uses A* search algorithm to find the optimal path between two nodes
-        """
+            self.attributes('-topmost', True)
+            self.title('Maze Solver')
+            Maze.__init__(self)
 
-        frontier = Frontier()
-        frontier.add(SearchNode(node0, node1))
-        explored = set()
+            self.coordinate_plane = CoordinatePlane(self)
+            self.controls = Controls(self)
+            self.coordinate_plane.create_axes()
+            self.create_origin()
 
-        while len(frontier):  # while not empty
-            node = frontier.pop()  # node is always an instance of SearchNode
-            explored.add(node)
+            self.coordinate_plane.grid(row=0, column=0)
+            tk.ttk.Separator(self, orient='vertical').grid(row=0, column=1, sticky='ns')
+            self.controls.grid(row=0, column=2, padx=20, sticky='nsew')
 
-            if node == node1:  # goal reached
-                res = [node.node]  # the node here is a SearchNode object and node.node is the actual Node object
-                while node.parent is not None:
-                    res.append(node.parent.node)  # trace back to origin
-                    node = node.parent
-                res.reverse()
-                return res
+            if not control:
+                self.hide_controls()
 
-            node.expand(goal=node1)
+        def hide_controls(self):
+            self.controls.grid_forget()
 
-            for n in node.children:
-                if n not in frontier.union(explored):
-                    frontier.add(n)
-                elif n in frontier:
-                    frontier.remove(n)
-                    frontier.add(n)  # I know this looks confusing
+        def create_origin(self):
+            self.origin = self.add_node(0, 0)
 
-                    # the underlying data structure for the frontier is a set, which only compares the hash and equality of two objects
-                    # two SearchNodes are compared to be equal if they have the same index, which came from the original Node
-                    # the hash value of a SearchNode is also its index. So even if two SearchNodes have completely differently parent and cost,
-                    # they are treated to be the same object by the frontier if they have the same index number
-                    # So this two lines actually switched the node to a completely different one
+        def add_node(self, x, y, isDeadEnd=False, color='black'):
+            n = Maze.add_node(self, x, y,
+                              isDeadEnd)  # x and y is in respect to the logical coordinate plane, not to tk.Canvas
+            x += self.coordinate_plane.width // 2
+            y = self.coordinate_plane.height // 2 - y
+            self.coordinate_plane.create_oval(x + 4, y + 4, x - 4, y - 4, fill=color, outline=color)
+            self.coordinate_plane.create_text(x + 15, y - 10, text='n%d' % n.index, fill='gray30')
+            self.coordinate_plane.update_idletasks()
+            return n
 
-        raise NoSolution("No possible route found between %s and %s" % (node0, node1))
+        def connect(self, n0: int, n1: int, color='black'):
+            if super().connect(n0, n1):
+                x0 = BaseNode.registry[n0].x + self.coordinate_plane.width // 2
+                x1 = BaseNode.registry[n1].x + self.coordinate_plane.width // 2
+                y0 = self.coordinate_plane.height // 2 - BaseNode.registry[n0].y
+                y1 = self.coordinate_plane.height // 2 - BaseNode.registry[n1].y
+                distance = self.calculate_distance(x0, y0, x1, y1)
+                self.coordinate_plane.create_line(x0, y0, x1, y1, fill=color)
+                self.coordinate_plane.create_text(*self.calculate_midpoint(x0, y0, x1, y1), text=str(distance),
+                                                  fill='royal blue')
+                self.coordinate_plane.update_idletasks()
+                return True
+            else:
+                return False
 
-    def mark_exit(self, e: Node):
-        self.exit = e
+        @staticmethod
+        def calculate_distance(x0: int, y0: int, x1: int, y1: int) -> int:
+            return round(math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
 
-    def find_way_out(self):
-        return self.search_route(self.origin, self.exit)
+        @staticmethod
+        def calculate_midpoint(x0: int, y0: int, x1: int, y1: int) -> (int, int):
+            return (x0 + x1) // 2, (y0 + y1) // 2
 
+        def search_and_highlight(self, n0: int, n1: int):
+            try:
+                self.coordinate_plane.highlight_nodes(self.search_route(BaseNode.registry[n0], BaseNode.registry[n1]))
+            except NoSolution:
+                self.coordinate_plane.create_text(self.coordinate_plane.width // 2, self.coordinate_plane.height // 2,
+                                                  text="No Solution Found", tag='highlight', fill='red',
+                                                  font=("Times", 36, 'bold'))
 
-    def connect(self,n0:int,n1:int):
-        """
-        :param n0: index of 0th Node
-        :param n1: index of first BaseNode
-        :return: None
-        This function is similar to Node.connect_to, but does not require a node instance
-        """
+        def randomly_generate_and_connect(self, n):
+            with warnings.catch_warnings():  # temporarily suppress warnings from connecting Nodes
+                warnings.filterwarnings('ignore')
+                width = self.coordinate_plane.width // 2 - 20
+                height = self.coordinate_plane.height // 2 - 20
+                for i in range(n):
+                    self.add_node(random.randrange(0, width) * random.choice([1, -1]),
+                                  random.randrange(0, height) * random.choice([1, -1]))
 
-        Node.registry[n0].connect_to(BaseNode.registry[n1])
+                    for r in range(2):
+                        t = 0
+                        s = self.connect(i+1, random.randint(0, len(BaseNode.registry)-1))
+                        while not s:
+                            s = self.connect(i+1, random.randint(0, len(BaseNode.registry)-1))
+                            if t > 3: break
+                            t += 1
+        #TODO: write a function to generate manhattan styled maze only
 
-    def add_node(self,x,y,isDeadEnd=False) -> BaseNode:
-        "Proxy to create a new node"
-        if isDeadEnd: return DeadEnd(x,y)
-        else: return Node(x,y)
+    class CoordinatePlane(tk.Canvas):
+        def __init__(self, root: tk.Tk):
+            self.height = round(root.winfo_screenheight() * 0.8)
+            self.width = round(root.winfo_screenwidth() * 0.8)
+            super().__init__(root, width=self.width, height=self.height)
 
-    @staticmethod
-    def calculate_distance(node0:BaseNode,node1:BaseNode) -> int:
-        return round(math.sqrt((node0.x - node1.x) ** 2 + (node0.y - node1.y) ** 2))
+            self.bind('<Enter>', self.event_mouse_enter)
+            self.bind('<Leave>', self.event_mouse_leave)
 
-    class SearchNode:
-    "This is for A* search only because a normal node does not store cost or its parent"
+        def create_axes(self, color='gray'):
+            self.create_line(0, self.height // 2, self.width, self.height // 2, fill=color)  # x axis
+            self.create_line(self.width // 2, 0, self.width // 2, self.height, fill=color)  # y axis
 
-    def __init__(self, node: BaseNode, goal: Node, parent=None, cost=0):
-        self.x = node.x
-        self.y = node.y
-        self.node = node
-        self.parent = parent  # this may be switched to a weakref for better performance
-        self.g = cost
-        self.index = node.index
-        self.children = set()
-        self.h = self.heuristic(node, goal)
+            self.create_text(20, self.height // 2 + 10, text=str(-self.width // 2), fill=color)  # x axis labels
+            self.create_text(self.width - 20, self.height // 2 + 10, text=str(self.width // 2), fill=color)
 
-    @staticmethod
-    def heuristic(node0: BaseNode, node1: BaseNode) -> int:
-        """This heuristic function is the Euclidean distance between two nodes"""
-        return round(math.sqrt((node0.x - node1.x) ** 2 + (node0.y - node1.y) ** 2))
+            self.create_text(self.width // 2 - 20, 10, text=str(self.height // 2), fill=color)
+            self.create_text(self.width // 2 - 20, self.height - 10, text=str(-self.height // 2),
+                             fill=color)  # y axis labels
 
-    def expand(self, goal: Node):
-        for edge in self.node._edges.values():
-            self.children.add(SearchNode(edge.get_other(self.index), goal, self, self.g + edge.length))
+        def event_mouse_enter(self, event):
+            self.bind('<Motion>', self.show_cursor_coordinate)
 
-    def __eq__(self, other):
-        return self.index == other.index
+        def event_mouse_leave(self, event):
+            self.unbind('<Motion>')
+            self.delete('coordinate')
 
-    def __int__(self):
-        return self.g + self.h
+        def show_cursor_coordinate(self, event):
+            "Display current cursor coordinate on top-right corner"
+            self.delete('coordinate')
+            x = round(event.x - self.width / 2)
+            y = round(self.height / 2 - event.y)
+            self.create_text(60, 20, text='x=%d, y=%d' % (x, y), tag='coordinate')
 
-    def __lt__(self, other):
-        return int(self) < int(other)
+        def highlight_nodes(self, nodes: list, color='gold'):
+            "This function will highlight every node and its path. It is meant to be used on the return value of search_route"
+            i = 0
+            while i < len(nodes):
+                x = nodes[i].x + self.width // 2
+                y = self.height // 2 - nodes[i].y
 
-    def __gt__(self, other):
-        return int(self) > int(other)
+                if i != 0:
+                    self.create_oval(x + 4, y + 4, x - 4, y - 4, fill=color, outline=color, tag='highlight')
+                    self.create_line(x, y, previous_x, previous_y, fill=color, tag='highlight')
+                else:
+                    self.create_oval(x + 4, y + 4, x - 4, y - 4, fill="green", outline="green", tag='highlight')
+                previous_x = x
+                previous_y = y
+                i += 1
 
-    def __le__(self, other):
-        return int(self) <= int(other)
+            self.create_oval(x + 4, y + 4, x - 4, y - 4, fill="red", outline="red", tag='highlight')  # Mark the last one
 
-    def __ge__(self, other):
-        return int(self) >= int(other)
+            self.update_idletasks()
 
-    def __hash__(self):
-        return self.index
-
-    def __repr__(self):
-        return "<SearchNode %d at (%d,%d)>" % (self.index, self.x, self.y)
-
-
-    class Frontier:
-    def __init__(self):
-        self.heap = []
-        self.members = set()  # Average time for membership test for a set is O(1) but O(n) for a list, which is the whole point of having this class
-
-    def add(self, item):
-        heapq.heappush(self.heap, item)
-        self.members.add(item)
-
-    def pop(self):
-        item = heapq.heappop(self.heap)
-        self.members.remove(item)
-        return item
-
-    def remove(self, item):
-        self.heap.remove(item)
-        self.members.remove(item)
-
-    def __len__(self):
-        return len(self.heap)
-
-    def __contains__(self, item):
-        return item in self.members
-
-    def union(self, other):
-        return self.members.union(other)
+        def remove_highlight(self):
+            self.delete('highlight')
+            self.update_idletasks()
 
 
-    def testRandomMaze():
-    import random
-    import matplotlib.pyplot as plt
-    import time
+    class Controls(tk.Frame):
+        def __init__(self, root: VisualizedMaze):
+            super().__init__(root, width=root.winfo_screenwidth() * 0.2, height=root.winfo_screenheight() * 0.8)
+            self.create_add_node_control().grid(row=0)
+            self.create_connection_control().grid(row=1)
+            self.create_solution_control().grid(row=2)
+            self.create_random_control().grid(row=3)
 
-    start_time = time.time()
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_rowconfigure(1, weight=1)
+            self.grid_rowconfigure(2, weight=1)
+            self.grid_rowconfigure(3, weight=1)
 
-    maze = Maze()
-    plt.plot(0, 0, 'go')
-    for i in range(10):
-        x = random.randrange(0, 100)
-        y = random.randrange(0, 100)
-        plt.plot(x, y, 'bo')
-        if Node.find_node(x, y) < 0:
-            n = Node(x, y)
-            r = random.choice(list(n.registry.copy()))
-            n.connect_to(r)
-            plt.plot([n.x, r.x], [n.y, r.y], 'r-')
-            r = random.choice(list(n.registry.copy()))
-            n.connect_to(r)
-            plt.plot([n.x, r.x], [n.y, r.y], 'r-')
-        else:
-            print("Node %s already exist at (%d,%d)" % (Node.registry[Node.find_node(x, y)], x, y))
+        def create_add_node_control(self):
+            def validation(text):
+                if text == '': return True
+                try:
+                    int(text)
+                except:
+                    return False
+                else:
+                    return True
 
-    e = random.choice(Node.registry)
-    maze.mark_exit(e)
-    plt.plot(e.x, e.y, 'rd')
+            validation = self.master.register(validation)
+            self.add_node_controls = tk.LabelFrame(self, text='Add a New Node')
+            tk.Label(self.add_node_controls, text="x:").grid(row=0, column=0)
+            n0 = tk.Entry(self.add_node_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.add_node_controls, text="y:").grid(row=0, column=2)
+            n1 = tk.Entry(self.add_node_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            print(n0.get())
+            tk.Button(self.add_node_controls, text='Add',
+                      command=lambda: self.master.add_node(int(n0.get()), int(n1.get()))).grid(row=1, columnspan=10)
 
-    try:
-        print(maze.find_way_out())
-    except NoSolution:
-        print("No solution")
-    print("Time spent: " + str(time.time() - start_time))
-    plt.show()
+            return self.add_node_controls
 
+        def create_connection_control(self):
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    if n >= len(BaseNode.registry):
+                        return False
+                    else:
+                        return True
 
-    def testMaze():
-    maze = Maze()
-    n0 = Node(10, 10)
-    n1 = Node(10, 20)
-    n2 = Node(20, 20)
-    n3 = Node(20, 10)
-    n4 = Node(25, 15)
-    n5 = Node(30, 20)
-    maze.origin.connect_to(n0)
-    n0.connect_to(n1)
-    n0.connect_to(n3)
-    n3.connect_to(n4)
-    n4.connect_to(n2)
-    n1.connect_to(n2)
-    n2.connect_to(n5)
-    maze.mark_exit(n5)
-    print(maze.find_way_out())
+            validation = self.master.register(validation)
+
+            self.connection_controls = tk.LabelFrame(self, text='Connect Two Nodes')
+            tk.Label(self.connection_controls, text="From n").grid(row=0, column=0)
+            n0 = tk.Entry(self.connection_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.connection_controls, text=" to n").grid(row=0, column=2)
+            n1 = tk.Entry(self.connection_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            tk.Button(self.connection_controls, text='Connect',
+                      command=lambda: self.master.connect(int(n0.get()), int(n1.get()))).grid(row=1, columnspan=10)
+
+            return self.connection_controls
+
+        def create_solution_control(self):
+
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    if n >= len(BaseNode.registry):
+                        return False
+                    else:
+                        return True
+
+            validation = self.master.register(validation)
+
+            self.solution_controls = tk.LabelFrame(self, text='Find the Shortest Route')
+            tk.Label(self.solution_controls, text="From n").grid(row=0, column=0)
+            n0 = tk.Entry(self.solution_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.solution_controls, text=" to n").grid(row=0, column=2)
+            n1 = tk.Entry(self.solution_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            tk.Button(self.solution_controls, text='Solve',
+                      command=lambda: self.master.search_and_highlight(int(n0.get()), int(n1.get()))).grid(row=1, column=0,
+                                                                                                           columnspan=2)
+            tk.Button(self.solution_controls, text='Clear', command=self.master.coordinate_plane.remove_highlight).grid(
+                row=1, column=2, columnspan=2)
+            return self.solution_controls
+
+        def create_random_control(self):
+
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    return True
+
+            validation = self.master.register(validation)
+
+            self.solution_controls = tk.LabelFrame(self, text='Generate Random Nodes')
+            tk.Label(self.solution_controls, text="Number of nodes").grid(row=0, column=0)
+            n = tk.Entry(self.solution_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n.grid(row=0, column=1)
+            tk.Button(self.solution_controls, text='Generate',
+                      command=lambda: self.master.randomly_generate_and_connect(int(n.get()))).grid(row=1, column=0,
+                                                                                                    columnspan=2)
+
+            return self.solution_controls
 
 
     if __name__ == "__main__":
-    testRandomMaze()
+        maze = VisualizedMaze()
+        maze.mainloop()
