@@ -1,0 +1,9 @@
+==================
+Friday, October 27
+==================
+
+.. raw:: html
+
+    <video width="681" height="373" controls>
+    <source src="../_static/Oct27.mp4" type="video/mp4">
+    </video>
