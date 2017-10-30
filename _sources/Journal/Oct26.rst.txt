@@ -2,7 +2,7 @@
 Thursday, October 26
 =====================
 
-I implemented :class:`VisualizedMaze` today. I spent the entire afternoon plus study hours doing this. Programming is just so addictive to me, even more addictive than video games. Now I finally have a GUI debugger for the maze. I also fixed some minor bugs.
+I implemented :class:`VisualizedMaze` today. Now I've gotten a nice GUI to display whatever I want it to  I spent the entire afternoon plus study hours doing this. Programming is just so addictive to me, even more addictive than video games. Now I finally have a GUI debugger for the maze. I also fixed some minor bugs.
 
 .. raw:: html
 
@@ -10,7 +10,7 @@ I implemented :class:`VisualizedMaze` today. I spent the entire afternoon plus s
     <source src="../_static/Oct26.mp4" type="video/mp4">
     </video>
 
-I'm so glad I learned :class:`tkinter` when I was bored back in April
+I'm so glad I learned :class:`tkinter` when I was bored back in April this year
 
 VisualizedMaze.py
 =================

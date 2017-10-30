@@ -2,8 +2,530 @@
 Friday, October 27
 ==================
 
+I completely changed the control panels on the right side of the program so that its easier to use in general. I also write a function to generate a random maze that fit the requirement for a maze for my robot(which I haven't even started work on). 
+
 .. raw:: html
 
     <video width="681" height="373" controls>
     <source src="../_static/Oct27.mp4" type="video/mp4">
     </video>
+
+
+VisualizedMaze.py
+=================
+
+.. code-block:: python
+
+    #!/usr/local/bin/python3.6
+    # coding=utf-8
+
+    from Maze import Maze, NoSolution
+    from DataStructures import Node, Edge
+    from AbstractBaseClasses import BaseNode, BaseEdge
+    import tkinter as tk
+    import tkinter.ttk
+    import math, random, warnings
+
+
+    class VisualizedMaze(tk.Tk, Maze):
+        # TODO: add a function to scale the coordinate plane
+
+        def __init__(self, control=True):
+            super().__init__()
+
+            self.attributes('-topmost', True)
+            self.title('Maze Solver')
+            Maze.__init__(self)
+
+            self.coordinate_plane = CoordinatePlane(self)
+            self.controls = Controls(self)
+            self.coordinate_plane.create_axes()
+            self.create_origin()
+
+            self.coordinate_plane.grid(row=0, column=0)
+            tk.ttk.Separator(self, orient='vertical').grid(row=0, column=1, sticky='ns')
+            self.controls.grid(row=0, column=2, padx=20, sticky='nsew')
+
+            if not control:
+                self.hide_controls()
+
+        def hide_controls(self):
+            self.controls.grid_forget()
+
+        def create_origin(self):
+            self.origin = self.add_node(0, 0)
+
+        def add_node(self, x, y, isDeadEnd=False, color='black'):
+            n = Maze.add_node(self, x, y,
+                              isDeadEnd)  # x and y is in respect to the logical coordinate plane, not to tk.Canvas
+            x += self.coordinate_plane.width // 2
+            y = self.coordinate_plane.height // 2 - y
+            self.coordinate_plane.create_oval(x + 3, y + 3, x - 3, y - 3, fill=color, outline=color)
+            self.coordinate_plane.create_text(x + 15, y - 10, text='n%d' % n.index, fill='gray30')
+            self.coordinate_plane.update_idletasks()
+            return n
+
+        def connect(self, n0: int, n1: int, color='black'):
+            if super().connect(n0, n1):
+                x0 = BaseNode.registry[n0].x + self.coordinate_plane.width // 2
+                x1 = BaseNode.registry[n1].x + self.coordinate_plane.width // 2
+                y0 = self.coordinate_plane.height // 2 - BaseNode.registry[n0].y
+                y1 = self.coordinate_plane.height // 2 - BaseNode.registry[n1].y
+                distance = self.calculate_distance(x0, y0, x1, y1)
+                self.coordinate_plane.create_line(x0, y0, x1, y1, fill=color)
+                self.coordinate_plane.create_text(*self.calculate_midpoint(x0, y0, x1, y1), text=str(distance),
+                                                  fill='royal blue', tag='distance')
+                self.coordinate_plane.update_idletasks()
+                return True
+            else:
+                return False
+
+        @staticmethod
+        def calculate_distance(x0: int, y0: int, x1: int, y1: int) -> int:
+            return round(math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
+
+        @staticmethod
+        def calculate_midpoint(x0: int, y0: int, x1: int, y1: int) -> (int, int):
+            return (x0 + x1) // 2, (y0 + y1) // 2
+
+        def search_and_highlight(self, n0: int, n1: int):
+            try:
+                self.coordinate_plane.highlight_nodes(self.search_route(BaseNode.registry[n0], BaseNode.registry[n1]))
+            except NoSolution:
+                self.coordinate_plane.create_text(self.coordinate_plane.width // 2, self.coordinate_plane.height // 2,
+                                                  text="No Solution Found", tag='highlight', fill='red',
+                                                  font=("Times", 36, 'bold'))
+
+        def randomly_generate_and_connect(self, n):
+            with warnings.catch_warnings():  # temporarily suppress warnings from connecting Nodes
+                warnings.filterwarnings('ignore')
+                width = self.coordinate_plane.width // 2 - 20
+                height = self.coordinate_plane.height // 2 - 20
+                for i in range(n):
+                    self.add_node(random.randrange(0, width) * random.choice([1, -1]),
+                                  random.randrange(0, height) * random.choice([1, -1]))
+
+                    for r in range(2):
+                        t = 0
+                        s = self.connect(i + 1, random.randint(0, len(BaseNode.registry) - 1))
+                        while not s:
+                            s = self.connect(i + 1, random.randint(0, len(BaseNode.registry) - 1))
+                            if t > 3: break
+                            t += 1
+
+        def generate_maze(self, n, s=10):
+            """
+            :param n: number of nodes to be generated
+            :param s: size of the maze. The function will run infinitely if n>s**2
+            :return: None
+            This function generate a maze on the coordinate plane so that
+            1. there is no isolated nodes
+            2. there is no diagonal connection between nodes
+            3. there is no overlapping edges
+            """
+            _n = n
+            c = 0.55
+            size = s
+
+            zoom = (
+                       self.coordinate_plane.height - 20) // size  # scale the maze to be size*size, height should be the same as min(height,width)
+
+            for i in range(n):  # add n of nodes to the map
+                flag = False
+                while not flag:
+                    x = random.randrange(0, size) - size // 2
+                    y = random.randrange(0, size) - size // 2
+                    if Node.find_node(x * zoom, y * zoom) < 0:
+                        flag = True
+                        self.add_node(x * zoom, y * zoom)
+
+            # The part below is super inefficient and badly written but I DON'T CARE
+
+            dict_x = {}  # stored value will be x:y
+            dict_y = {}  # stored value will be y:x
+
+            for x, y in Node.map.keys():
+                try:
+                    dict_x[x].append(y)
+                    dict_x[x].sort()
+                except KeyError:
+                    dict_x[x] = [y]
+
+                try:
+                    dict_y[y].append(x)
+                    dict_y[y].sort()
+                except KeyError:
+                    dict_y[y] = [x]
+
+            to_be_connected = set()  # in a tuple (n0,n1) where n0 and n1 are index number of a node
+            nodes_with_edge = set()
+
+            for x in dict_x:
+                i = 0
+                while i < len(dict_x[x]) - 1:
+                    y0 = dict_x[x][i]
+                    y1 = dict_x[x][i + 1]
+                    if (not Node.find_node(x, y0) in nodes_with_edge and not Node.find_node(x,
+                                                                                            y1) in nodes_with_edge) or random.random() <= c:  # to ensure each node has at least one edge
+                        n0 = Node.find_node(x, y0)
+                        n1 = Node.find_node(x, y1)
+                        to_be_connected.add((n0, n1))
+                        nodes_with_edge.add(n0)
+                        nodes_with_edge.add(n1)
+                    i += 1
+
+            for y in dict_y:
+                i = 0
+                while i < len(dict_y[y]) - 1:
+                    x0 = dict_y[y][i]
+                    x1 = dict_y[y][i + 1]
+                    if (not Node.find_node(x0, y) in nodes_with_edge and not Node.find_node(x1,
+                                                                                            y) in nodes_with_edge) or random.random() <= c:  # to ensure each node has at least one edge
+                        n0 = Node.find_node(x0, y)
+                        n1 = Node.find_node(x1, y)
+                        to_be_connected.add((n0, n1))
+                        nodes_with_edge.add(n0)
+                        nodes_with_edge.add(n1)
+                    i += 1
+
+            # Try to find intersections in the maze that is not a node
+
+
+            hlines = {}  # in format y:(x0,x1) where x0<x1
+            vlines = {}
+
+            for n0, n1 in to_be_connected:
+                n0 = Node.registry[n0]
+                n1 = Node.registry[n1]
+                if n0.x == n1.x:  # this is a vertical line
+                    try:
+                        vlines[n0.x].append((n0.y, n1.y) if n0.y < n1.y else (n1.y, n0.y))
+                    except KeyError:
+                        vlines[n0.x] = [(n0.y, n1.y) if n0.y < n1.y else (n1.y, n0.y)]
+                else:  # horizontal
+                    try:
+                        hlines[n0.y].append((n0.x, n1.x) if n0.x < n1.x else (n1.x, n0.x))
+                    except KeyError:
+                        hlines[n0.y] = [(n0.x, n1.x) if n0.x < n1.x else (n1.x, n0.x)]
+
+            for x in vlines:
+                for v in vlines[x]:
+                    y0, y1 = v  # y0<y1
+                    for y in hlines:
+                        if y0 <= y <= y1:
+                            for h in hlines[y]:
+                                x0, x1 = h
+                                if x0 <= x <= x1:  # this two lines intersect at (x,y)
+                                    if Node.find_node(x, y) < 0:
+                                        n = self.add_node(x, y)
+                                        to_be_connected.add((n.index, Node.find_node(x, y0)))
+                                        to_be_connected.add((n.index, Node.find_node(x, y1)))
+                                        to_be_connected.add((n.index, Node.find_node(x0, y)))
+                                        to_be_connected.add((n.index, Node.find_node(x1, y)))
+
+            for x, y in Node.map.keys():
+                try:
+                    dict_x[x].append(y)
+                    dict_x[x].sort()
+                except KeyError:
+                    dict_x[x] = [y]
+
+                try:
+                    dict_y[y].append(x)
+                    dict_y[y].sort()
+                except KeyError:
+                    dict_y[y] = [x]
+
+            def sort_key(t):  # sort the edges by length
+                n0 = Node.registry[t[0]]
+                n1 = Node.registry[t[1]]
+                return self.calculate_distance(n0.x, n0.y, n1.x, n1.y)
+
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore')
+                for n0, n1 in sorted(to_be_connected, key=sort_key):
+                    self.connect(n0, n1)
+
+            def connect_nearest(n: Node) -> bool:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings('ignore')
+                    possible_y = dict_x[n.x]
+                    loc_y = possible_y.index(n.y)
+                    if loc_y > 0:
+                        if self.connect(n.index, Node.find_node(n.x, possible_y[loc_y - 1])):
+                            return True
+
+                    if loc_y < len(possible_y) - 1:
+                        if self.connect(n.index, Node.find_node(n.x, possible_y[loc_y + 1])):
+                            return True
+
+                    possible_x = dict_y[n.y]
+                    loc_x = possible_x.index(n.x)
+
+                    if loc_x > 0:
+                        if self.connect(n.index, Node.find_node(possible_x[loc_x - 1], n.y)):
+                            return True
+
+                    if loc_x < len(possible_x) - 1:
+                        if self.connect(n.index, Node.find_node(possible_x[loc_x + 1], n.y)):
+                            return True
+
+                    return False
+
+            for node in Node.registry.values():
+                try:
+                    self.search_route(node, self.origin)
+                except NoSolution:
+                    t = 0
+                    while not connect_nearest(node):
+                        node = node.get_edge(random.choice([node._edges.keys()])).get_other(
+                                node.index)  # try to connect to the main maze from its neighbours
+                        t += 1
+                        if t > _n: break
+
+
+    class CoordinatePlane(tk.Canvas):
+        def __init__(self, root: tk.Tk):
+            self.height = round(root.winfo_screenheight() * 0.8)
+            self.width = round(root.winfo_screenwidth() * 0.8)
+            super().__init__(root, width=self.width, height=self.height)
+
+            self.bind('<Enter>', self.event_mouse_enter)
+            self.bind('<Leave>', self.event_mouse_leave)
+
+        def create_axes(self, color='gray'):
+            self.create_line(0, self.height // 2, self.width, self.height // 2, fill=color)  # x axis
+            self.create_line(self.width // 2, 0, self.width // 2, self.height, fill=color)  # y axis
+
+            self.create_text(20, self.height // 2 + 10, text=str(-self.width // 2), fill=color)  # x axis labels
+            self.create_text(self.width - 20, self.height // 2 + 10, text=str(self.width // 2), fill=color)
+
+            self.create_text(self.width // 2 - 20, 10, text=str(self.height // 2), fill=color)
+            self.create_text(self.width // 2 - 20, self.height - 10, text=str(-self.height // 2),
+                             fill=color)  # y axis labels
+
+        def event_mouse_enter(self, event):
+            self.bind('<Motion>', self.show_cursor_coordinate)
+
+        def event_mouse_leave(self, event):
+            self.unbind('<Motion>')
+            self.delete('coordinate')
+
+        def show_cursor_coordinate(self, event):
+            "Display current cursor coordinate on top-right corner"
+            self.delete('coordinate')
+            x = round(event.x - self.width / 2)
+            y = round(self.height / 2 - event.y)
+            self.create_text(60, 20, text='x=%d, y=%d' % (x, y), tag='coordinate')
+
+        def highlight_nodes(self, nodes: list, color='gold'):
+            "This function will highlight every node and its path. It is meant to be used on the return value of search_route"
+            i = 0
+            while i < len(nodes):
+                x = nodes[i].x + self.width // 2
+                y = self.height // 2 - nodes[i].y
+
+                if i != 0:
+                    self.create_oval(x + 4, y + 4, x - 4, y - 4, fill=color, outline=color, tag='highlight')
+                    self.create_line(x, y, previous_x, previous_y, fill=color, tag='highlight')
+                else:
+                    self.create_oval(x + 4, y + 4, x - 4, y - 4, fill="green", outline="green", tag='highlight')
+                previous_x = x
+                previous_y = y
+                i += 1
+
+            self.create_oval(x + 4, y + 4, x - 4, y - 4, fill="red", outline="red", tag='highlight')  # Mark the last one
+
+            self.update_idletasks()
+
+        def remove_highlight(self):
+            self.delete('highlight')
+            self.update_idletasks()
+
+        def remove_distance(self):
+            self.delete('distance')
+            self.update_idletasks()
+
+
+    class Controls(tk.Frame):
+        def __init__(self, root: VisualizedMaze):
+            super().__init__(root, width=root.winfo_screenwidth() * 0.2, height=root.winfo_screenheight() * 0.8)
+
+            self.create_add_node_control().grid(row=0)
+            self.create_connection_control().grid(row=1)
+            self.create_solution_control().grid(row=2)
+            self.create_random_control().grid(row=3)
+            self.create_maze_generation_control().grid(row=4)
+            self.random_controls.grid_forget()
+            # self.create_debug_control().grid(row=5)
+            self.create_distance_control().grid(row=6)
+
+            for row in range(7): self.grid_rowconfigure(row, weight=1)
+
+        def create_add_node_control(self):
+            def validation(text):
+                if text == '': return True
+                try:
+                    int(text)
+                except:
+                    return False
+                else:
+                    return True
+
+            validation = self.master.register(validation)
+            self.add_node_controls = tk.LabelFrame(self, text='Add a New Node')
+            tk.Label(self.add_node_controls, text="x:").grid(row=0, column=0)
+            n0 = tk.Entry(self.add_node_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.add_node_controls, text="y:").grid(row=0, column=2)
+            n1 = tk.Entry(self.add_node_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            print(n0.get())
+            tk.Button(self.add_node_controls, text='Add',
+                      command=lambda: self.master.add_node(int(n0.get()), int(n1.get()))).grid(row=1, columnspan=10)
+
+            return self.add_node_controls
+
+        def create_connection_control(self):
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    if n >= len(BaseNode.registry):
+                        return False
+                    else:
+                        return True
+
+            validation = self.master.register(validation)
+
+            self.connection_controls = tk.LabelFrame(self, text='Connect Two Nodes')
+            tk.Label(self.connection_controls, text="From n").grid(row=0, column=0)
+            n0 = tk.Entry(self.connection_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.connection_controls, text=" to n").grid(row=0, column=2)
+            n1 = tk.Entry(self.connection_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            tk.Button(self.connection_controls, text='Connect',
+                      command=lambda: self.master.connect(int(n0.get()), int(n1.get()))).grid(row=1, columnspan=10)
+
+            return self.connection_controls
+
+        def create_solution_control(self):
+
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    if n >= len(BaseNode.registry):
+                        return False
+                    else:
+                        return True
+
+            validation = self.master.register(validation)
+
+            self.solution_controls = tk.LabelFrame(self, text='Find the Shortest Route')
+            tk.Label(self.solution_controls, text="From n").grid(row=0, column=0)
+            n0 = tk.Entry(self.solution_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n0.grid(row=0, column=1)
+            tk.Label(self.solution_controls, text=" to n").grid(row=0, column=2)
+            n1 = tk.Entry(self.solution_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n1.grid(row=0, column=3)
+            tk.Button(self.solution_controls, text='Solve',
+                      command=lambda: self.master.search_and_highlight(int(n0.get()), int(n1.get()))).grid(row=1, column=0,
+                                                                                                           columnspan=2)
+            tk.Button(self.solution_controls, text='Clear', command=self.master.coordinate_plane.remove_highlight).grid(
+                    row=1, column=2, columnspan=2)
+            return self.solution_controls
+
+        def create_random_control(self):
+
+            def validation(text):
+                if text == '': return True
+                try:
+                    n = int(text)
+                except:
+                    return False
+                else:
+                    return True
+
+            validation = self.master.register(validation)
+
+            self.random_controls = tk.LabelFrame(self, text='Generate Random Nodes')
+            tk.Label(self.random_controls, text="Number of nodes").grid(row=0, column=0)
+            n = tk.Entry(self.random_controls, width=2, validate='all', validatecommand=(validation, '%P'))
+            n.grid(row=0, column=1)
+            tk.Button(self.random_controls, text='Generate',
+                      command=lambda: self.master.randomly_generate_and_connect(int(n.get()))).grid(row=1, column=0,
+                                                                                                    columnspan=2)
+            return self.random_controls
+
+        def create_maze_generation_control(self):
+
+            def validation(text):
+                if text == '': return True
+                try:
+                    int(text)
+                except:
+                    return False
+                else:
+                    return True
+
+            validation = self.master.register(validation)
+
+            self.maze_generation_controls = tk.LabelFrame(self, text='Generate A Random Maze')
+            tk.Label(self.maze_generation_controls, text="Number of nodes").grid(row=0, column=0)
+
+            n = tk.Entry(self.maze_generation_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            n.grid(row=0, column=1)
+
+            tk.Label(self.maze_generation_controls,
+                     text="Max number of nodes per axis,\n must be greater than \n square root of previous field").grid(
+                    row=1, column=0)
+            s = tk.Entry(self.maze_generation_controls, width=3, validate='all', validatecommand=(validation, '%P'))
+            s.grid(row=1, column=1)
+
+            def generate(self):
+                self.master.generate_maze(int(n.get()), int(s.get()))
+
+                self.maze_generation_controls.grid_forget()
+                self.random_controls.grid_forget()
+                self.connection_controls.grid_forget()
+                self.add_node_controls.grid_forget()
+
+            tk.Button(self.maze_generation_controls, text='Generate',
+                      command=lambda: generate(self)).grid(row=2, column=0, columnspan=2)
+
+            return self.maze_generation_controls
+
+        def create_debug_control(self):
+
+            self.debug_controls = tk.LabelFrame(self, text='Exec')
+
+            n = tk.Text(self.debug_controls, width=20, height=10)
+            n.grid(row=0)
+
+            tk.Button(self.debug_controls, text='Exec', command=lambda: exec(n.get(0.0, tk.END), globals(), locals())).grid(
+                    row=1)
+
+            return self.debug_controls
+
+        def create_distance_control(self):
+
+            self.distance_control = tk.LabelFrame(self, text='Distance')
+
+            tk.Button(self.distance_control, text='Remove Distances',
+                      command=self.master.coordinate_plane.remove_distance).grid(
+                    row=0)
+
+            return self.distance_control
+
+
+    if __name__ == "__main__":
+        maze = VisualizedMaze()
+        maze.mainloop()
