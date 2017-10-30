@@ -16,6 +16,19 @@ After my friend tried the program and completely screwed it up, I added some not
 
 Its kind of funny how I spent so much time on writing code for generating a random maze, even though the project is "maze solver."
 
+With the svg image support now, I can send the maze to a lasercutter.
+
+Try this one, start from the green dot and end at the red dot:
+
+.. image:: ../_static/ex_maze.svg
+    :align: center
+
+The shortest way is this:
+
+.. image:: ../_static/ex_maze_solution.svg
+    :align: center
+
+
 
 VisualizedMaze.py
 =================
