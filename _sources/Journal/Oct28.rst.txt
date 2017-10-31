@@ -1,6 +1,6 @@
-=====================
-Saturnday, October 28
-=====================
+====================
+Saturday, October 28
+====================
 
 After my friend tried the program and completely screwed it up, I added some notice on how big the number should be for "generating a maze" field if someone has no idea what those fields mean. In addition, I also:
 

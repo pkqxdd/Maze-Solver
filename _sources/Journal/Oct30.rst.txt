@@ -1,0 +1,16 @@
+==================
+Monday, October 30
+==================
+
+Today, I figured out the dimension of everything I need to fit on my robot (exclusing wires.) I didn't realize how big the power bank is until I made this image. The pictures of that thing look pretty small on Amazon... 
+
+.. image:: ../_static/Oct30.svg
+
+According to my current plan, I will have to make a robot with four layers, which I don't really want to. But I also don't want to make my robot unnecessarily big viewing from top.
+
+There are only a few things I have to place on the bottom layer:
+
+#. Motors and wheels
+#. Reflectance sensor array
+
+Everything else can be put anywhere and connected via wires.

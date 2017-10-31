@@ -1,6 +1,6 @@
-=====================
-Saturnday, October 14
-=====================
+====================
+Saturday, October 14
+====================
 
 I couldn't sleep until about 2 a.m. last night, because I was too excited about the project I will be doing. Despite the fact that I do not have any parts to work on, I can still write the abstract data structure for the maze solver. In my programming class (MITx 6.00.2x), I learned that abstraction is very important. When it is done properly, codes can work the same way even if the low level implementation is changed completely. This is kind of like Python the language itself: there are a lot of variation of implementation (CPython, PyPy, Jython, IronPython, etc.) on different platforms (Windows, macOS, Linux, etc.), but the programming interface remains the same throughout.
 
