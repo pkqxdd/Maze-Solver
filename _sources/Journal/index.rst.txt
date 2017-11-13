@@ -2,6 +2,25 @@
 The Journal
 ===========
 
+I realized the major difficulty with the Interet now is not finding the information, but to filter information. Information exists everywhere, and it's impossible for a person to go through it. It's not hard to find the right information, but to find the related information. So, a month after the start of this project, I decided to put this table on the top of this journal, though few people will ever find this journal.
+
+.. csv-table::
+    :header: Date, Two Words Summary
+    October 13, Project Proposal
+    October 14, Base Classes
+    October 17, Physics Calculation
+    October 24, Data Structures
+    October 25, Research: Power
+    October 26, User Interface
+    October 27, User Interface
+    October 28, Maze Generation
+    October 30, Physical Structures
+    November 6, Remote Access
+    November 7, Soldering Parts
+    November 8, 3D Printing
+    November 10, Prototype: Base
+    November 12, Prototype: Base
+
 
 .. toctree::
     :maxdepth: 1
@@ -16,7 +35,12 @@ The Journal
     Oct27.rst
     Oct28.rst
     Oct30.rst
+    Nov6.rst
+    Nov7.rst
+    Nov8.rst
+    Nov10.rst
+    Nov12.rst
 
-
+    References.rst
 
 .. I hope that by the time I finish this project, I say:"The best part is, I journaled everything"

@@ -1,0 +1,11 @@
+==================
+Monday, November 6
+==================
+
+I spent 2 hours tonight trying to figure out how to connect the raspberry pi to the school's wifi. Becuase raspberry pi only has chromium built-in, the page cannot be redirected to the authentication page because of security reasons. According to the poor knowledge I have about cybersecurity, the web login process is similar to man-in-the-middle attack. The solution I found in the end is:
+
+#. ``curl`` a random webpage
+#. Read the result and find out where the web page should be redirected
+#. Go to that link and login
+
+After that, I could easily ssh into system. Although I still need to figure out a way to know the ip address of the RPi when there is no monitor connected to it. 

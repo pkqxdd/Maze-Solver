@@ -1,0 +1,7 @@
+=====================
+Wednesday, November 8
+=====================
+
+I printed out the motor brackets using the 3D printer. The brackets don't fit the motors perfectly but should be fine. I can't really change it because I find the design on Thingiverse and I don't really know how to do 3D modelling.
+
+.. image:: ../_static/MotorBracket.jpeg

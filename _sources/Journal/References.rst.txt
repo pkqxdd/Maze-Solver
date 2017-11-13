@@ -1,0 +1,54 @@
+==========
+References
+==========
+
+    Here is a list of websites I referenced in the process of this project. Not all references on this list are "useful." On the contary, most of them are "useless" because they stoped me from doing something (potentially) stupid. Also, some of them are merely background knowledge that is not directly related to this project. I tried to keep this list as thorough as possible, but inevitably some websites are missed. I apologize here. Also, websites and documentations for most of the parts used in this project are not on the list.
+
+This list is ordered randomly (beleive or not, a script actually shuffles this list every time it updates).
+
+#. http://www.astrolog.org/labyrnth/algrithm.htm
+#. http://gpiozero.readthedocs.io/en/v1.3.1/api_pins.html
+#. https://electronics.stackexchange.com/a/37066/166448
+#. https://www.thingiverse.com/thing:252470
+#. http://www.robotmarketplace.com/products/0-276-1491.html
+#. https://docs.anaconda.com/anaconda/packages/pkg-docs
+#. https://www.modmypi.com/blog/how-do-i-power-my-raspberry-pi
+#. https://www.pololu.com/docs/0J20
+#. https://www.pololu.com/product/3081
+#. http://raspi.tv/2017/how-to-auto-connect-your-raspberry-pi-to-a-hidden-ssid-wifi-network
+#. https://www.pololu.com/category/60/micro-metal-gearmotors
+#. https://www.raspberrypi.org/documentation/usage/gpio/
+#. https://www.pololu.com/docs/0J19/3
+#. https://learn.adafruit.com/ssd1306-oled-displays-with-raspberry-pi-and-beaglebone-black
+#. https://playground.arduino.cc/Code/Interrupts
+#. https://rogershobbycenter.com/lipoguide/
+#. http://openenergymonitor.blogspot.com/2013/12/developing-for-arduino-remotely-on.html
+#. https://www.raspberrypi.org/documentation/remote-access/
+#. https://www.rugged-circuits.com/10-ways-to-destroy-an-arduino/
+#. http://raspi.tv/2013/8-x-8-led-array-driven-by-max7219-on-the-raspberry-pi-via-python
+#. https://github.com/hanseartic/MotorShield
+#. http://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap
+#. https://www.pololu.com/product/2213/specs
+#. https://www.pololu.com/docs/0J12/3
+#. http://www.me.umn.edu/courses/me2011/arduino/technotes/dcmotors/motor-tutorial/>
+#. https://luma-led-matrix.readthedocs.io/en/latest/
+#. http://www.projectideasblog.com/2012/10/maze-solving-robot.html
+#. https://store.arduino.cc/usa/arduino-motor-shield-rev3
+#. http://www2.mae.ufl.edu/designlab/Class%20Projects/Background%20Information/Friction%20coefficients.htm
+#. https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize
+#. https://learn.adafruit.com/adafruit-oled-displays-for-raspberry-pi
+#. https://www.lifewire.com/ways-to-power-your-raspberry-pi-4092246
+#. https://raspberrypi.stackexchange.com/questions/59381/how-do-i-update-my-rpi3-to-python-3-6
+#. http://gpiozero.readthedocs.io/en/v1.3.1/index.html
+#. https://stackoverflow.com/questions/12399087/curl-to-access-a-page-that-requires-a-login-from-a-different-page
+#. https://robotics.stackexchange.com/a/615
+#. https://playground.arduino.cc/Main/RotaryEncoders
+#. https://www.raspberrypi.org/forums/viewtopic.php?f=100&t=83783
+#. http://www.instructables.com/id/Maze-Solving-Robot/
+#. http://www.instructables.com/id/Maze-Solver-Robot-Using-Artificial-Intelligence-Wi/
+#. https://playground.arduino.cc/MotorControlShieldV3/0
+#. http://docs.python.org
+#. https://www.raspberrypi.org/forums/viewtopic.php?t=82373
+#. https://gonium.net/md/2006/12/20/handling-external-interrupts-with-arduino/
+#. https://www.raspberrypi.org/forums/viewtopic.php?t=21110
+#. https://www.pololu.com/docs/0J19/3

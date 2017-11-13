@@ -1,0 +1,10 @@
+===================
+Tuesday, November 7
+===================
+
+I spent most of the time today soldering magnetic encoders to micro gear motors. They are really tiny and hard to solder. I start to feel slightly dizzy after staring at them for about 30 minutes.
+
+.. image:: ../_static/SolderedMotor.jpeg
+.. image:: ../_static/ReflectiveSensorArray.jpeg
+
+Also, I made a prototype of wheels. Sadly, I threw them away the minute I realized they are not the right size without at least taking a picture. I didn't even save the file for the wheels...

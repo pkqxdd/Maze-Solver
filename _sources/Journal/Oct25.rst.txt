@@ -42,18 +42,6 @@ Another solution is to use one giant 7.2v LiPo battery to power the entire syste
     It is possible to reverse power the Raspberry Pi via its GPIO pin. But the voltage must be exactly 5v, or the pin will be damaged.
 
 
-References:
-
-#. `ARDUINO MOTOR SHIELD REV3 Documentation <https://store.arduino.cc/usa/arduino-motor-shield-rev3>`_
-#. `10 Ways to Power your Raspberry Pi <https://www.lifewire.com/ways-to-power-your-raspberry-pi-4092246>`_
-#. `How do I power my Raspberry Pi? <https://www.modmypi.com/blog/how-do-i-power-my-raspberry-pi>`_
-#. `10 Ways to Destroy An Arduino <https://www.rugged-circuits.com/10-ways-to-destroy-an-arduino/>`_
-#. `USB cable as +5v vcc source <https://electronics.stackexchange.com/a/37066/166448>`_
-#. `A Guide to Understanding LiPo Batteries <https://rogershobbycenter.com/lipoguide/>`_
-#. `Understanding DC Motors <http://www.me.umn.edu/courses/me2011/arduino/technotes/dcmotors/motor-tutorial/>`_
-#. `50:1 Micro Metal Gearmotor HP 6V with Extended Motor Shaft Specs <https://www.pololu.com/product/2213/specs>`_
-#. `What is stall current and free current of motors? <https://robotics.stackexchange.com/a/615>`_
-
 A* Search Algorithm
 ===================
 

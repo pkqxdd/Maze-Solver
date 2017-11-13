@@ -1,0 +1,11 @@
+===================
+Sunday, November 12
+===================
+
+I forgot to leave space for the ball caster and the pins for the reflective sensor array in the first prototype. I fixed them, added holes for ziptying the batteries and made new prototypes with acrylics. I'm ready to start to assemble the robot.
+
+.. image:: ../_static/Nov12.svg
+
+By the way, it took 14 minutes 56 seconds to laser cut this piece, which is slighly shorter than the first prototype.
+
+.. image:: ../_static/Prototype1.jpeg

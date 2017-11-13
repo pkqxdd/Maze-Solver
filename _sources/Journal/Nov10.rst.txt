@@ -1,0 +1,12 @@
+===================
+Friday, November 10
+===================
+
+
+After a long time of measuring and researching online, I finally finished the first prototype of the base of the robot -- that is, the plate on which all the eletric components will be mounted on. The design look like this:
+
+.. image:: ../_static/Nov10.svg
+
+For the sake of saving material, I lasercut the prototype on a chip board. To be honest, they look great even if they are only the first prototype. I even started to think about using the lasercutter to make some sort of board game. 
+
+.. image:: ../_static/Prototype0.jpeg
