@@ -1,0 +1,30 @@
+===================
+Monday, November 13
+===================
+
+I spent about 6 hours today working on the robot. It's finally moving and, to my surprise, moved without requiring me plugging in external power source. I powered the robot solely on a power bank, although the power was going straight to the arduino without the raspberry pi. I had to use the laser cutter several times to actually make the right sized wheels because the parts produced is not exactly the same as the design. The diameter of an actual circle is about 0.3 mm longer than the design, which is negligible most of the time. The wheels, however, have to fit the motors perfectly, and the 0.3 mm's difference is not negligible in this case.
+
+Like this:
+
+.. raw:: html
+
+    <video width="616" height="616" controls>
+    <source src="../_static/UnstableWheels.mp4" type="video/mp4">
+    </video>
+
+
+I also made a new iteration of prototype of the mounting plates. They look much better than before. A major change is that I resized the mounting holes on the corner of each plate from #2 sized screw holes to 8-32 so I can use standoffs to connect each piece.
+
+.. image:: ../_static/Prototype2.jpg
+
+I didn't mount the LiPo charger to the plate with raspberry pi because I forgot to consider the micro-SD card on the RPi. So there is actually not enough space for another charger. I figured it's not a big problem so I just left it alone.
+
+.. image:: ../_static/Layout.jpg
+
+In the end, here is the video of the robot actually running. It kept going left because (I didn't know that until after I took the video) the rubber band on the left wheel fell off, so the right side is constantly running faster than the left side.
+
+.. raw:: html
+
+    <video width="620" height="400" controls>
+    <source src="../_static/Robot0.mp4" type="video/mp4">
+    </video>

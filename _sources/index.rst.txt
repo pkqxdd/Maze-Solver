@@ -18,11 +18,12 @@ I realized the major difficulty with the Interet now is not finding the informat
     October 27, User Interface
     October 28, Maze Generation
     October 30, Physical Structures
-    November 6, Remote Access
+    November 6, SSH: RPi
     November 7, Soldering Parts
     November 8, 3D Printing
     November 10, Prototype: Base
     November 12, Prototype: Base
+    November 13, Prototype: Robot
 
 
 .. toctree::

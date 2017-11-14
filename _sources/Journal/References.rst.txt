@@ -52,3 +52,7 @@ This list is ordered randomly (beleive or not, a script actually shuffles this l
 #. https://gonium.net/md/2006/12/20/handling-external-interrupts-with-arduino/
 #. https://www.raspberrypi.org/forums/viewtopic.php?t=21110
 #. https://www.pololu.com/docs/0J19/3
+#. https://elinux.org/RPi_Serial_Connection
+#. https://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/
+#. https://oscarliang.com/connect-raspberry-pi-and-arduino-usb-cable/
+#. https://www.raspberrypi.org/magpi/program-arduino-uno-raspberry-pi/
