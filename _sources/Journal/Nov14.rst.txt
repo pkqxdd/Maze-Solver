@@ -1,0 +1,15 @@
+====================
+Tuesday, November 14
+====================
+
+I did some additional testings to make sure everything's wired correctly. Also, in the video yesterday, the motors were not powered by the LiPo batteries but the USB power bank. It runs much faster after I plugged the batteries in.
+
+I also glued the rubber bands on the wheels.
+
+I realized the LiPo batteries can actually power the arduino in addition to the motor shield, which is not mentioned in the documentation of the motor shield.
+
+The robot kept turning right because the weight distribution is not very balanced, which can be fixed in the program by giving the left wheels an offset.
+
+Lastly, a photo of the robot:
+
+.. image:: ../_static/Nov14.jpg

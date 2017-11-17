@@ -22,6 +22,9 @@ The Journal
     Nov10.rst
     Nov12.rst
     Nov13.rst
+    Nov14.rst
+    Nov15.rst
+    Nov16.rst
 
     References.rst
 

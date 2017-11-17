@@ -1,0 +1,83 @@
+======================
+Wednesday, November 15
+======================
+
+I tried to connect the RPi to Arduino with USB. RPi was turned off three seconds after it's connected to the arduino when only powered by the power bank. It's working fine when the LiPo batteries are pluged in, as I expected. For some unknown reasons, I could only recieve but not send information correctly via the ``Serial`` interface. Further investigation needed.
+
+I wrote the program for the robot to follow a line. It is very simple.
+
+.. raw:: html
+
+    <video width="540" height="960" controls>
+    <source src="../_static/Nov15.mp4" type="video/mp4">
+    </video>
+
+Because of the simple codes, the robot doesn't really turn smoothly. It does the job though.
+
+The Code
+========
+
+.. code-block:: c++
+
+    #include <QTRSensors.h>
+
+    const int directionApin=12;
+    const int directionBpin=13;
+    const int powerApin=3;
+    const int powerBpin=11;
+    const int brakeApin=9;
+    const int brakeBpin=8;
+    QTRSensorsRC sensors((unsigned char[]) {2,4,5,6,7,10},6);
+    unsigned int sensor_values[8];
+
+    void setup() {
+      // put your setup code here, to run once:
+      pinMode(12,OUTPUT);
+      pinMode(3,OUTPUT);
+      pinMode(13,OUTPUT);
+      pinMode(11,OUTPUT);
+      pinMode (9, OUTPUT);
+      pinMode (8, OUTPUT);
+      pinMode (2, INPUT);
+      pinMode (4, INPUT);
+      pinMode (5, INPUT);
+      pinMode (6, INPUT);
+      pinMode (7, INPUT);
+      pinMode (10, INPUT);
+      Serial.begin(19200);
+      Serial.println("Started sensors calibration");
+
+
+      for (int i = 0; i < 250; i++)
+      {
+        sensors.calibrate();
+        delay(10);
+      }
+
+      Serial.println("Sensors calibration finished");
+    }
+
+    void loop() {
+        unsigned int sensor_values[6];
+
+
+      int pos=sensors.readLine(sensor_values);
+      int error=pos-2500;
+      int leftMotorSpeed = 120;
+      int rightMotorSpeed = 120;
+      if (error > 0)  // the line is on the left
+        leftMotorSpeed = 50;  // turn left
+      if (error < 0)  // the line is on the right
+        rightMotorSpeed = 50;  // turn right
+      Serial.println(error);
+      powerMotors(leftMotorSpeed,rightMotorSpeed);
+
+    }
+
+
+
+    void powerMotors(int left, int right){
+      analogWrite(powerApin,left);
+      analogWrite(powerBpin,right);
+
+    }

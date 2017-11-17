@@ -7,7 +7,7 @@ Final Robotics Project for CS450HO. Last updated on |today|
 I realized the major difficulty with the Interet now is not finding the information, but to filter information. Information exists everywhere, and it's impossible for a person to go through it. It's not hard to find the right information, but to find the related information. So, a month after the start of this project, I decided to put this table on the top of this journal, though few people will ever find this journal.
 
 .. csv-table::
-    :header: Date, Two Words Summary
+    :header: Date, Two Words Summary/Highlight
 
     October 13, Project Proposal
     October 14, Base Classes
@@ -24,6 +24,9 @@ I realized the major difficulty with the Interet now is not finding the informat
     November 10, Prototype: Base
     November 12, Prototype: Base
     November 13, Prototype: Robot
+    November 14, Wiring: Robot
+    November 15, Line Follower
+    November 16, Programing: PID
 
 
 .. toctree::

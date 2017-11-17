@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Thursday, November 16 &#8212; The Maze Solver</title>
+    <link rel="stylesheet" href="../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References" href="References.html" />
+    <link rel="prev" title="Wednesday, November 15" href="Nov15.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../index.html">The Maze Solver</a> &#187;</li>
+          <li><a href="index.html" accesskey="U">The Journal</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="thursday-november-16">
+<h1>Thursday, November 16<a class="headerlink" href="#thursday-november-16" title="Permalink to this headline">¶</a></h1>
+<p>(All videos on this journal entry are silent)</p>
+<p>I soldered two JST connectors onto the motor shield so now I can plug in and unplug the LiPo batteries easily.</p>
+<img alt="../_images/Nov16.jpg" src="../_images/Nov16.jpg" />
+<p>I finished the program of the robot in terms of following a line. The program is not very stable because:</p>
+<ol class="arabic simple">
+<li>Calibrating the sensors is required before the robot is started, which, when done incorrectly, may affect performance. Specifically, the robot will be turning in a small circle. I have no idea why.</li>
+<li>It’s very dependent on the environmental light. The existence of shadows or the insufficiency of light will “break” the program, basically.</li>
+</ol>
+<p>An example of incorrect calibration:</p>
+<video width="540" height="960" controls>
+<source src="../_static/WrongCalibration.mp4" type="video/mp4">
+</video><p>In the program today, I explored the idea of PID control. Specifically, the P and D. In terms of a line follower, this is pretty easy and does not require knowledge of calculus to actually implement the function. All you need is the general idea of how big the offset from P and D and tune the P constant and D constant accordingly. It’s a time consuming work to tune all the constants right. Basically, a process of trials-and-errors.</p>
+<p>An example of P constant being too low but the robot is brought back by the D offset. I think this video somewhat shows the powerful part of PID control.</p>
+<video width="540" height="960" controls>
+<source src="../_static/WrongParameter.mp4" type="video/mp4">
+</video><p>Finally, two videos of succeeded trial. As in the videos, the robot runs much smoother than yesterday.</p>
+<video width="540" height="960" controls>
+<source src="../_static/Nov16_0.mp4" type="video/mp4">
+</video>
+<br><video width="540" height="960" controls>
+<source src="../_static/Nov16_1.mp4" type="video/mp4">
+</video><div class="section" id="the-code">
+<h2>The Code<a class="headerlink" href="#the-code" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;QTRSensors.h&gt;</span><span class="cp"></span>
+
+<span class="k">const</span> <span class="kt">int</span> <span class="n">directionApin</span><span class="o">=</span><span class="mi">12</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">directionBpin</span><span class="o">=</span><span class="mi">13</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">powerApin</span><span class="o">=</span><span class="mi">3</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">powerBpin</span><span class="o">=</span><span class="mi">11</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">brakeApin</span><span class="o">=</span><span class="mi">9</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">brakeBpin</span><span class="o">=</span><span class="mi">8</span><span class="p">;</span>
+<span class="n">QTRSensorsRC</span> <span class="nf">sensors</span><span class="p">((</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="p">[])</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">},</span><span class="mi">6</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">sensor_values</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+<span class="c1">// put your setup code here, to run once:</span>
+<span class="n">pinMode</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">pinMode</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+<span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">19200</span><span class="p">);</span>
+<span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Started sensors calibration&quot;</span><span class="p">);</span>
+
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">250</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="n">sensors</span><span class="p">.</span><span class="n">calibrate</span><span class="p">();</span>
+<span class="n">delay</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensors calibration finished&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">lastError</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">KP</span><span class="o">=</span><span class="mf">0.0245</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">KD</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">int</span> <span class="n">M1</span><span class="o">=</span><span class="mi">65</span><span class="p">;</span> <span class="c1">//left</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">M2</span><span class="o">=</span><span class="mi">60</span><span class="p">;</span> <span class="c1">//right</span>
+
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">sensor_values</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+
+<span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">sensors</span><span class="p">.</span><span class="n">readLine</span><span class="p">(</span><span class="n">sensor_values</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="n">error</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">-</span> <span class="mi">2500</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">KP</span> <span class="o">*</span> <span class="n">error</span> <span class="o">+</span> <span class="n">KD</span> <span class="o">*</span> <span class="p">(</span><span class="n">error</span> <span class="o">-</span> <span class="n">lastError</span><span class="p">);</span>
+<span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Error: &quot;</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">error</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot; |Offset P:&quot;</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">KP</span> <span class="o">*</span> <span class="n">error</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot; |Offset D:&quot;</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">KD</span> <span class="o">*</span> <span class="p">(</span><span class="n">error</span> <span class="o">-</span> <span class="n">lastError</span><span class="p">));</span>
+
+<span class="n">lastError</span> <span class="o">=</span> <span class="n">error</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="n">m1Speed</span> <span class="o">=</span> <span class="n">M1</span> <span class="o">-</span> <span class="n">offset</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">m2Speed</span> <span class="o">=</span> <span class="n">M2</span> <span class="o">+</span> <span class="n">offset</span><span class="p">;</span>
+<span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Left: &quot;</span><span class="p">);</span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">m1Speed</span><span class="p">);</span> <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot; Right: &quot;</span><span class="p">);</span> <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">m2Speed</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">m1Speed</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">m1Speed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">m2Speed</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">m2Speed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">m1Speed</span> <span class="o">&gt;</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">m1Speed</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">m2Speed</span> <span class="o">&gt;</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">m2Speed</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+
+<span class="n">powerMotors</span><span class="p">(</span><span class="n">m1Speed</span><span class="p">,</span><span class="n">m2Speed</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">powerMotors</span><span class="p">(</span><span class="kt">int</span> <span class="n">left</span><span class="p">,</span> <span class="kt">int</span> <span class="n">right</span><span class="p">){</span>
+<span class="n">analogWrite</span><span class="p">(</span><span class="n">powerApin</span><span class="p">,</span><span class="n">left</span><span class="p">);</span>
+<span class="n">analogWrite</span><span class="p">(</span><span class="n">powerBpin</span><span class="p">,</span><span class="n">right</span><span class="p">);</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+    <a id="sidebar-anchor"></a>
+    
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../index.html">Table Of Contents</a></h3>
